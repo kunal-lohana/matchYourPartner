@@ -2,29 +2,30 @@ const express = require("express");
 
 const app = express();
 
-const { adminAuth, userAuth } = require("./middleware/auth");
-
-app.use("/admin", adminAuth);
-// app.use("/user", userAuth);
-
-app.get('/admin/getAllData', (req, res) => {
-    res.send("Fetch Admin Data");
-});
-
-app.get('/admin/Delete', (req, res) => {
-    res.send("Delete Admin Data");
-})
-
+// add try catch to handle particular route error
 app.get('/user/login', (req, res) => {
-    res.send("User login successfully");
+    try {
+        throw new Error("Something wrong in user login");
+        res.send("User login successfully");
+    } catch(error) {
+        res.status(500).send("Something wrong in user login");
+    }
 });
 
-app.get('/user/getAllData', userAuth, (req, res) => {
+app.get('/user/getAllData', (req, res) => {
+    throw new Error("axy adfdfd");
     res.send("Fetch User Data");
 });
 
-app.get('/user/Delete', userAuth, (req, res) => {
+app.get('/user/Delete', (req, res) => {
     res.send("Delete User Data");
+})
+
+// global handling all types of error here...
+app.use("/", (err, req, res, next) => {
+    if(err) {
+        res.status(500).send("Something went wrong!!");
+    }
 })
 
 app.listen(7777, () => {
