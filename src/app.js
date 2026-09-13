@@ -1,30 +1,40 @@
 const express = require("express");
-
 const app = express();
 
-// add try catch to handle particular route error
-app.get('/user/login', (req, res) => {
-    try {
-        throw new Error("Something wrong in user login");
-        res.send("User login successfully");
-    } catch(error) {
-        res.status(500).send("Something wrong in user login");
+const { userAuth }  = require("./middleware/auth");
+
+class apiError extends Error {
+    constructor(status, message) {
+        super(message)
+        this.status = status;
     }
+}
+
+app.get("/admin", (req, res) => {
+    throw new apiError(400, 'client Error')
+})
+app.get('/user/getAllData', userAuth, (err, req, res, next) => {
+    res.send(`Get AllData user error: ${err}`);
 });
 
-app.get('/user/getAllData', (req, res) => {
-    throw new Error("axy adfdfd");
-    res.send("Fetch User Data");
-});
-
-app.get('/user/Delete', (req, res) => {
+app.get('/user/delete', (req, res, next) => {
+    next("/delete not exist")
     res.send("Delete User Data");
 })
 
 // global handling all types of error here...
-app.use("/", (err, req, res, next) => {
+app.use('/', (req, res, next) => {
+    console.log('Matches routes -> but it is Request handler');
+        res.status(401).send(` not found1`);
+})
+
+// global handling all types of error here...
+app.use('/', (err, req, res, next) => {
+    console.log('Error handler -> run only when error occured');
     if(err) {
-        res.status(500).send("Something went wrong!!");
+        res.status(500).send(err ? `Hey ${err}` : "Something went wrong!!");
+    } else {
+        res.status(401).send(`${req.param}  error found1`);
     }
 })
 
