@@ -62,6 +62,47 @@ app.get("/user", async (req, res) => {
 
 })
 
+// Add SignUp data in DB
+app.post("/signup", async (req, res) => {
+    console.log(req.body);
+    // create a new instance of User Model
+    const user = new User(req.body);
+    try {
+        await user.save();
+        res.send("Data saved successfully!!");
+    } catch (error) {
+        res.status(400).send("Error occured while saving user data" + error.message);
+    }
+})
+
+
+// update partial data of user
+app.patch("/user/:userId", async(req, res) => {
+    const userData = req.body;
+    const userId = req.params?.userId;
+    const ALLOWED_UPDATES = ["photoUrl", "about", "skills"];
+    try {
+        const isAllowedUpdates = Object.keys(userData).every((userKey) =>
+            ALLOWED_UPDATES.includes(userKey)
+        );
+        if(!isAllowedUpdates) {
+            throw new Error('Update not allowed!!');
+        }
+        const user = await User.findByIdAndUpdate(userId, userData, { 
+            returnDocument: 'before', 
+            runValidators: true
+        });
+        console.log('user before update', user);
+        if(!user) {
+            res.status(404).send('User not exists');
+        } else {
+            res.send('User updated successfully');
+        }
+    } catch(error) {
+        res.status(500).send("Update Failed!! :"+error);
+    }
+})
+
 //delete user by id
 app.delete("/user", async (req, res) => {
     const userId = req.body.userId;
@@ -77,41 +118,13 @@ app.delete("/user", async (req, res) => {
     }
 })
 
-// update partial data of user
-app.patch("/user", async(req, res) => {
-    const userData = req.body;
-    const userId = req.body.userId;
-    try {
-        const user = await User.findByIdAndUpdate(userId, userData, { returnDocument: 'before'});
-        console.log('user before update', user);
-        if(!user) {
-            res.status(404).send('User not exists');
-        } else {
-            res.send('User updated successfully');
-        }
-    } catch(error) {
-        res.status(500).send("Something went wrong!!");
-    }
-})
-
-app.post("/signup", async (req, res) => {
-    console.log(req.body);
-    // create a new instance of User Model
-    const user = new User(req.body);
-    try {
-        await user.save();
-        res.send("Data saved successfully!!");
-    } catch (error) {
-        res.status(400).send("Error occured while saving user data" + error.message);
-    }
-})
-
 connectDB()
-    .then(() => {
+    .then(async () => {
         console.log('Database connected successfully !!');
+        await User.createIndexes();
         app.listen(7777, () => {
             console.log('Server is running on port 7777...');
         });
     })
-    .catch(error => console.error('Database is not connected'));
+    .catch(error => console.error('Database is not connected', error));
 
