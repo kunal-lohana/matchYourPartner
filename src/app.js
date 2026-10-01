@@ -2,6 +2,8 @@ const express = require("express");
 const { connectDB } = require("./config/database");
 const User = require("./models/user");
 const app = express();
+const { validateSignUpData, validateLoginData } = require("./utils/validator");
+const bcrypt = require("bcrypt");
 
 // read JSON and convert JSON into JS object and add in req.body
 app.use(express.json());
@@ -64,14 +66,46 @@ app.get("/user", async (req, res) => {
 
 // Add SignUp data in DB
 app.post("/signup", async (req, res) => {
-    console.log(req.body);
-    // create a new instance of User Model
-    const user = new User(req.body);
+    const { firstName, lastName, email, password } = req.body;
     try {
+        // validate fields
+        await validateSignUpData(req.body);
+        // bcrypt the password
+        const hashPassword = await bcrypt.hash(password, 10);
+
+        // create a new instance of User Model
+        const user = new User({
+            firstName, 
+            lastName, 
+            email, 
+            password: hashPassword
+        });
+        console.log('/signup user data:', user);
         await user.save();
         res.send("Data saved successfully!!");
     } catch (error) {
-        res.status(400).send("Error occured while saving user data" + error.message);
+        res.status(400).send("Error :" + error.message);
+    }
+})
+
+// login user
+app.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        await validateLoginData(req.body);
+        const user = await User.findOne({ email: email}); // return null or object
+        if(!user) {
+            res.status(400).send('Invalid Credentials!!');
+        } else {
+            const isPasswordValid = await bcrypt.compare(password, user.password);
+            if(!isPasswordValid) {
+            res.status(400).send('Invalid Credentials!!');
+            } else {
+                res.send("Login successfully!!");
+            }
+        }
+    } catch(error) {
+        res.status(400).send("Error :"+ error.message);
     }
 })
 
