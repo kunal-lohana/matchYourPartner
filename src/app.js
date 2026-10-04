@@ -4,9 +4,13 @@ const User = require("./models/user");
 const app = express();
 const { validateSignUpData, validateLoginData } = require("./utils/validator");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { isUserAuthenticate } = require("./middleware/auth");
 
 // read JSON and convert JSON into JS object and add in req.body
 app.use(express.json());
+app.use(cookieParser());
 
 // get All user data
 app.get("/feed", async (req, res) => {
@@ -27,22 +31,22 @@ app.get("/feed", async (req, res) => {
 app.get("/user/:id", async (req, res, next) => {
     const userId = req.params.id;
     console.log('userId', userId);
-    if(!userId) next()
+    if (!userId) next()
     else {
         try {
             // const userDetails = await User.findOne({ _id : userId});
             const userDetails = await User.findById(userId);
             console.log('raise quey for db', userDetails);
-            if(!userDetails) {
+            if (!userDetails) {
                 res.status(400).send('UserId not exists!');
             } else {
                 res.send(userDetails);
             }
-        } catch(error) {
-        res.status(500).send('Something went wrong!!');
+        } catch (error) {
+            res.status(500).send('Something went wrong!!');
+        }
     }
-}
-    
+
 
 })
 
@@ -75,9 +79,9 @@ app.post("/signup", async (req, res) => {
 
         // create a new instance of User Model
         const user = new User({
-            firstName, 
-            lastName, 
-            email, 
+            firstName,
+            lastName,
+            email,
             password: hashPassword
         });
         console.log('/signup user data:', user);
@@ -90,28 +94,56 @@ app.post("/signup", async (req, res) => {
 
 // login user
 app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+    const { email = "", password = "" } = req.body || {};
     try {
         await validateLoginData(req.body);
-        const user = await User.findOne({ email: email}); // return null or object
-        if(!user) {
+        const user = await User.findOne({ email: email }); // return null or object
+        if (!user) {
             res.status(400).send('Invalid Credentials!!');
         } else {
             const isPasswordValid = await bcrypt.compare(password, user.password);
-            if(!isPasswordValid) {
-            res.status(400).send('Invalid Credentials!!');
+            if (!isPasswordValid) {
+                res.status(400).send('Invalid Credentials!!');
             } else {
+                // create jsonwebtoken
+                const token = await jwt.sign(
+                    { _id: user._id },
+                    "MatchYourPatner@121",
+                    { expiresIn: "1d" });
+                // Add token in cookie
+                res.cookie("token", token, {
+                    maxAge: 15 * 60 * 1000,
+                    httpOnly: true,
+                    secure: true
+                });
+
                 res.send("Login successfully!!");
             }
         }
-    } catch(error) {
-        res.status(400).send("Error :"+ error.message);
+    } catch (error) {
+        res.status(400).send("Error :" + error.message);
     }
 })
 
+//fetch profile
+app.get("/profile", isUserAuthenticate, (req, res) => {
+    try {
+        const userData = req?.user;
+        res.send('logeed-in User: ' + userData.firstName);
+    } catch (error) {
+        res.status(400).send("Error :" + error.message);
+    }
+});
+
+//sendConnectionRequest
+app.get("/sendConnectionRequest", isUserAuthenticate, (req, res) => {
+    const userData = req?.user || {};
+    res.send(userData.firstName + " send the connection request");
+});
+
 
 // update partial data of user
-app.patch("/user/:userId", async(req, res) => {
+app.patch("/user/:userId", async (req, res) => {
     const userData = req.body;
     const userId = req.params?.userId;
     const ALLOWED_UPDATES = ["photoUrl", "about", "skills"];
@@ -119,21 +151,21 @@ app.patch("/user/:userId", async(req, res) => {
         const isAllowedUpdates = Object.keys(userData).every((userKey) =>
             ALLOWED_UPDATES.includes(userKey)
         );
-        if(!isAllowedUpdates) {
+        if (!isAllowedUpdates) {
             throw new Error('Update not allowed!!');
         }
-        const user = await User.findByIdAndUpdate(userId, userData, { 
-            returnDocument: 'before', 
+        const user = await User.findByIdAndUpdate(userId, userData, {
+            returnDocument: 'before',
             runValidators: true
         });
         console.log('user before update', user);
-        if(!user) {
+        if (!user) {
             res.status(404).send('User not exists');
         } else {
             res.send('User updated successfully');
         }
-    } catch(error) {
-        res.status(500).send("Update Failed!! :"+error);
+    } catch (error) {
+        res.status(500).send("Update Failed!! :" + error);
     }
 })
 
@@ -142,12 +174,12 @@ app.delete("/user", async (req, res) => {
     const userId = req.body.userId;
     try {
         const user = await User.findByIdAndDelete(userId);
-        if(!user) {
+        if (!user) {
             res.status(401).send('User not exist')
         } else {
             res.send("User deleted successfully!!");
         }
-    } catch(error) {
+    } catch (error) {
         res.status(404).send('user not allowed!!');
     }
 })
