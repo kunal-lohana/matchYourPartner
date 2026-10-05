@@ -101,15 +101,13 @@ app.post("/login", async (req, res) => {
         if (!user) {
             res.status(400).send('Invalid Credentials!!');
         } else {
-            const isPasswordValid = await bcrypt.compare(password, user.password);
+            const isPasswordValid = await user.validatePassword(password);
             if (!isPasswordValid) {
                 res.status(400).send('Invalid Credentials!!');
             } else {
                 // create jsonwebtoken
-                const token = await jwt.sign(
-                    { _id: user._id },
-                    "MatchYourPatner@121",
-                    { expiresIn: "1d" });
+                const token = await user.getJWT();
+                console.log('token', token);
                 // Add token in cookie
                 res.cookie("token", token, {
                     maxAge: 15 * 60 * 1000,

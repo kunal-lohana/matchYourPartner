@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -16,7 +18,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         validate(value) {
-            if(!validator.isStrongPassword(value)) {
+            if (!validator.isStrongPassword(value)) {
                 throw new Error("Enter Strong Password ");
             }
         }
@@ -29,8 +31,8 @@ const userSchema = new mongoose.Schema({
         lowercase: true,
         trim: true,
         validate(value) {
-            if(!validator.isEmail(value)) {
-                throw new Error("Invalid Email Address :"+value);
+            if (!validator.isEmail(value)) {
+                throw new Error("Invalid Email Address :" + value);
             }
         }
     },
@@ -50,7 +52,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQZvIR3JcAsDXouJzsWk04xRF08hEhhtGBmGn5boHLEBg&s",
         validate(value) {
-           if(!validator.isURL(value)) {
+            if (!validator.isURL(value)) {
                 throw new Error("Invalid photo url");
             }
         }
@@ -63,7 +65,7 @@ const userSchema = new mongoose.Schema({
     skills: {
         type: [String],
         validate(value) {
-            if(!(value.length <= 10)) {
+            if (!(value.length <= 10)) {
                 throw new Error('More than 10 skills not allowed !!');
             }
         }
@@ -71,5 +73,20 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true
 })
+
+userSchema.methods.getJWT = async function () {
+    const user = this;
+    const token = await jwt.sign(
+        { _id: user._id },
+        "MatchYourPatner@121",
+        { expiresIn: "10000" });
+    return token;
+}
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+    const hashPassword = this.password;
+    const isPasswordValid = await bcrypt.compare(passwordInputByUser, hashPassword);
+    return isPasswordValid;
+}
 
 module.exports = mongoose.model("User", userSchema)
