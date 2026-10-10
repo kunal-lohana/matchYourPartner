@@ -11,10 +11,9 @@
 - PATCH /profile/password
 
 ## connectionRouter
-- POST /request/send/ignored/:userId
-- POST /request/send/interested/:userId
-- POST /request/received/accepted/:requestId
-- POST /request/received/rejected/:requestId
+- POST /request/send/:status/:userId" //ignored|interested
+
+- POST /request/review/:status/:requestId // accepted|interested
 
 ## userRouter
 - GET /user/feed - get views all profile of others users on platform

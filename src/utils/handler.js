@@ -1,6 +1,6 @@
 
 const responseHandler = (res, statusCode, status, message, data = null) => {
-    res.status(status).json({
+    res.status(statusCode).json({
         status: status,
         message: message,
         data
