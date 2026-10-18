@@ -18,9 +18,10 @@ authRouter.post("/signup", async (req, res) => {
             firstName,
             lastName,
             email,
+            about,
+            skills,
             password: hashPassword
         });
-        console.log('/signup user data:', user);
         await user.save();
         res.send("Data saved successfully!!");
     } catch (error) {
@@ -43,7 +44,6 @@ authRouter.post("/login", async (req, res) => {
             } else {
                 // create jsonwebtoken
                 const token = await user.getJWT();
-                console.log('token', token);
                 // Add token in cookie
                 res.cookie("token", token, {
                     maxAge: 15 * 60 * 1000,

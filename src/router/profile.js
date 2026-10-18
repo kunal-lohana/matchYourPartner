@@ -8,13 +8,14 @@ const crypto = require("crypto");
 //fetch profile
 profileRouter.get("/profile/view", isUserAuthenticate, (req, res) => {
     try {
-        const userData = req?.user;
+        const { firstName, lastName, email, gender, age, about, skills, photoUrl } = req?.user;
+
         return responseHandler(
             res,
             200,
             'success',
             'User details',
-            userData
+            { firstName, lastName, email, gender, age, about, skills, photoUrl }
         )
     } catch (error) {
         return responseHandler(

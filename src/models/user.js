@@ -71,7 +71,13 @@ const userSchema = new mongoose.Schema({
         }
     },
 }, {
-    timestamps: true
+    timestamps: {
+        createdAt: {
+            type: Date,
+            index: true
+        },
+        updatedAt: true
+    }
 })
 
 userSchema.methods.getJWT = async function () {
