@@ -50,8 +50,10 @@ authRouter.post("/login", async (req, res) => {
                     httpOnly: true,
                     secure: true
                 });
-
-                res.send("Login successfully!!");
+                res.json({
+                    message: "Login successfully!!",
+                    data: user
+                });
             }
         }
     } catch (error) {
