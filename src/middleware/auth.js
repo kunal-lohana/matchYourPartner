@@ -5,7 +5,7 @@ const isUserAuthenticate = async (req, res, next) => {
     try {
         const { token } = req.cookies;
         if (!token) {
-            throw new Error('Token not valid!');
+           return res.status(401).send("Invalid Token!!");
         } else {
             const decodeToken = await jwt.verify(token, "MatchYourPatner@121");
             const userData = decodeToken?._id ? await User.findById(decodeToken?._id) : null;

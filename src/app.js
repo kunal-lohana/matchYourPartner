@@ -8,13 +8,14 @@ const profileRouter = require("./router/profile");
 const requestRouter = require("./router/request");
 const userRouter = require("./router/user");
 const cors = require("cors");
+const { WHITE_LIST_URL} = require("./utils/constants");
 
 // read JSON and convert JSON into JS object and add in req.body
 app.use(express.json());
 app.use(cookieParser());
 // Adds headers: Access-Control-Allow-Origin: *
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: WHITE_LIST_URL,
     credentials: true
 }))
 

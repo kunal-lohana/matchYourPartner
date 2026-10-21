@@ -65,21 +65,15 @@ const userSchema = new mongoose.Schema({
     skills: {
         type: [String],
         validate(value) {
-            if (!(value.length <= 10)) {
+            if (!(value?.length <= 10)) {
                 throw new Error('More than 10 skills not allowed !!');
             }
         }
     },
 }, {
-    timestamps: {
-        createdAt: {
-            type: Date,
-            index: true
-        },
-        updatedAt: true
-    }
+    timestamps: true
 })
-
+userSchema.index({ createdAt: 1 });
 userSchema.methods.getJWT = async function () {
     const user = this;
     const token = await jwt.sign(

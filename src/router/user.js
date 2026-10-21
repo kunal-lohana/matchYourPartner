@@ -3,7 +3,7 @@ const userRouter = express.Router();
 const { isUserAuthenticate } = require("../middleware/auth");
 const User = require("../models/user");
 const ConnectionRequest = require("../models/requests");
-const USER_SAFE_DATA = "firstName lastName age gender about skills";
+const USER_SAFE_DATA = "firstName lastName age gender about skills photoUrl";
 
 // get All user data
 // - not include himself details

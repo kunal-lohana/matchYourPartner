@@ -41,7 +41,8 @@ profileRouter.patch("/profile/edit", isUserAuthenticate, async (req, res) => {
             res,
             200,
             'success',
-            'Edit profile successfully'
+            'Edit profile successfully',
+            userData
         )
     } catch (error) {
         return responseHandler(
