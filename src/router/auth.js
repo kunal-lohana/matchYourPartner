@@ -25,9 +25,7 @@ authRouter.post("/signup", async (req, res) => {
         const token = await user.getJWT();
         // Add token in cookie
         res.cookie("token", token, {
-            maxAge: 15 * 60 * 1000,
-            httpOnly: true,
-            secure: false
+            maxAge: 15 * 60 * 1000
         });
         res.json({
             message: "Data saved successfully!!",
@@ -55,9 +53,7 @@ authRouter.post("/login", async (req, res) => {
                 const token = await user.getJWT();
                 // Add token in cookie
                 res.cookie("token", token, {
-                    maxAge: 15 * 60 * 1000,
-                    httpOnly: true,
-                    secure: false
+                    maxAge: 15 * 60 * 1000
                 });
                 res.json({
                     message: "Login successfully!!",
@@ -71,10 +67,8 @@ authRouter.post("/login", async (req, res) => {
 })
 
 authRouter.post("/logout", (req, res) => {
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: false,
-        sameSite: "lax"
+    res.clearCookie("token", null, {
+        maxAge: new Date(Date.now()),
     });
 
     res.json({
