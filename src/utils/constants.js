@@ -1,9 +1,6 @@
 const ALLOWED_SEND_STATUS = ['interested', 'ignored'];
 const ALLOWED_REVIEW_STATUS = ['accepted', 'rejected'];
-const WHITE_LIST_URL = [
-    "http://localhost:5173",
-    "http://16.178.127.205"
-];
+const WHITE_LIST_URL = "http://16.178.127.205";
 
 module.exports = {
     ALLOWED_SEND_STATUS,
