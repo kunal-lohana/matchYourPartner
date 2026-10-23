@@ -15,7 +15,13 @@ app.use(express.json());
 app.use(cookieParser());
 // Adds headers: Access-Control-Allow-Origin: *
 app.use(cors({
-    origin: WHITE_LIST_URL,
+    origin: function (origin, callback) {
+        if (!origin || WHITE_LIST_URL.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error("Not allowed by CORS"));
+        }
+    },
     credentials: true
 }))
 
