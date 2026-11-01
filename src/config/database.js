@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const url = "mongodb+srv://rajatrao000_db_user:d6RywkRNYDlmpyOE@kforevernode.grebre2.mongodb.net/matchYourPartner";
+const url = process.env.DB_CONNECTION_SECRET;
 
 const connectDB = async() => {
     await mongoose.connect(url);

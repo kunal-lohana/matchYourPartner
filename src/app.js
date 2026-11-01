@@ -34,9 +34,9 @@ connectDB()
     .then(async () => {
         console.log('Database connected successfully !!');
         await User.createIndexes();
-        app.listen(7777, () => {
+        app.listen(process.env.PORT, () => {
             console.log('Server is running on port 7777...');
         });
     })
-    .catch(error => console.error('Database is not connected', error));
+    .catch(error => console.error('Database is not connected:', error));
 

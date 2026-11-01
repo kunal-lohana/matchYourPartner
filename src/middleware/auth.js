@@ -7,7 +7,7 @@ const isUserAuthenticate = async (req, res, next) => {
         if (!token) {
            return res.status(401).send("Invalid Token!!");
         } else {
-            const decodeToken = await jwt.verify(token, "MatchYourPatner@121");
+            const decodeToken = await jwt.verify(token, process.env.JWT_SECRET);
             const userData = decodeToken?._id ? await User.findById(decodeToken?._id) : null;
             if (!userData) {
                 throw new Error('User not found!');
